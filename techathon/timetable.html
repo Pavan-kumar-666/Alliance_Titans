@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Engineering Timetable Scheduler</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid black; padding: 10px; text-align: center; }
+        th { background-color: #f4f4f4; }
+        input { width: 100%; border: none; text-align: center; }
+        .save-btn { margin-top: 15px; padding: 10px 20px; background-color: green; color: white; cursor: pointer; border: none; border-radius: 5px; }
+    </style>
+</head>
+<body>
+
+    <h1>Timetable Page</h1>
+    <h2>Engineering Student Timetable Scheduler</h2>
+    <p>Date: <input type="date" id="timetable-date"></p>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Time Slot</th>
+                <th>Monday</th>
+                <th>Tuesday</th>
+                <th>Wednesday</th>
+                <th>Thursday</th>
+                <th>Friday</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>8:30 - 9:30 AM</td>
+                <td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+            </tr>
+            <tr>
+                <td>9:30 - 10:30 AM</td>
+                <td contenteditable="true"></td><td contenteditable="true"></td>
+                <td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <button class="save-btn" onclick="saveTimetable()">Save Timetable</button>
+
+    <script>
+        document.getElementById("timetable-date").addEventListener("change", function() {
+            let date = this.value;
+            if (!date) return;
+
+            fetch(`fetch_timetable.php?date=${date}`)
+            .then(response => response.json())
+            .then(data => {
+                let rows = document.querySelectorAll("tbody tr");
+                rows.forEach((row, index) => {
+                    if (data[index]) {
+                        let cells = row.querySelectorAll("td");
+                        cells[1].innerText = data[index].monday;
+                        cells[2].innerText = data[index].tuesday;
+                        cells[3].innerText = data[index].wednesday;
+                        cells[4].innerText = data[index].thursday;
+                        cells[5].innerText = data[index].friday;
+                    } else {
+                        let cells = row.querySelectorAll("td");
+                        for (let i = 1; i <= 5; i++) {
+                            cells[i].innerText = "";
+                        }
+                    }
+                });
+            })
+            .catch(error => console.error("Error:", error));
+        });
+
+        function saveTimetable() {
+            let date = document.getElementById("timetable-date").value;
+            if (!date) { alert("Please select a date!"); return; }
+
+            let tableData = [];
+            let rows = document.querySelectorAll("tbody tr");
+
+            rows.forEach(row => {
+                let cells = row.querySelectorAll("td");
+                let rowData = {
+                    time_slot: cells[0].innerText,
+                    monday: cells[1].innerText,
+                    tuesday: cells[2].innerText,
+                    wednesday: cells[3].innerText,
+                    thursday: cells[4].innerText,
+                    friday: cells[5].innerText
+                };
+                tableData.push(rowData);
+            });
+
+            fetch("save_timetable.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ date: date, timetable: tableData })
+            })
+            .then(response => response.text())
+            .then(data => alert(data))
+            .catch(error => console.error("Error:", error));
+        }
+    </script>
+
+</body>
+</html>

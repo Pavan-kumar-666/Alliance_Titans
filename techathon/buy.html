@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buy Items</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f4f4f9; }
+        .item-card { border-radius: 10px; overflow: hidden; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); }
+    </style>
+</head>
+<body>
+
+<div class="container mt-4">
+    <h2 class="text-center">Buy Items</h2>
+    <input type="text" id="searchBar" class="form-control mb-3" placeholder="Search items...">
+    
+    <div class="row" id="itemList"></div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        fetch("buy.php")
+            .then(response => response.json())
+            .then(data => {
+                let itemList = document.getElementById("itemList");
+                itemList.innerHTML = data.map(item => `
+                    <div class="col-md-4">
+                        <div class="card item-card">
+                            <img src="${item.image_path}" class="card-img-top" alt="${item.item_name}">
+                            <div class="card-body text-center">
+                                <h5>${item.item_name}</h5>
+                                <a href="item-details.html?id=${item.id}" class="btn btn-primary">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            });
+
+        document.getElementById("searchBar").addEventListener("input", function() {
+            let query = this.value.toLowerCase();
+            let items = document.querySelectorAll(".item-card");
+            items.forEach(item => {
+                let name = item.querySelector("h5").textContent.toLowerCase();
+                item.style.display = name.includes(query) ? "" : "none";
+            });
+        });
+    });
+</script>
+
+</body>
+</html>

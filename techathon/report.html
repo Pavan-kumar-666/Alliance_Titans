@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report an Issue</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        .container { max-width: 400px; margin: auto; padding: 20px; background: #f4f4f4; border-radius: 8px; }
+        .input-field { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }
+        .btn { background: green; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer; width: 100%; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Report an Issue</h2>
+    <form id="reportForm">
+        <input type="email" id="email" name="email" class="input-field" placeholder="Your Email" required>
+        <textarea id="issue" name="issue" class="input-field" placeholder="Describe the issue..." required></textarea>
+        <button type="submit" class="btn">Submit Report</button>
+    </form>
+    <p id="response" style="color: green; font-weight: bold;"></p>
+</div>
+
+<script>
+    document.getElementById("reportForm").addEventListener("submit", function(event) {
+        event.preventDefault(); // Prevents page reload on form submit
+
+        let email = document.getElementById("email").value.trim();
+        let issue = document.getElementById("issue").value.trim();
+
+        if (email === "" || issue === "") {
+            document.getElementById("response").innerText = "Please fill in all fields!";
+            return;
+        }
+
+        fetch("report.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: `email=${encodeURIComponent(email)}&issue=${encodeURIComponent(issue)}`
+        })
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById("response").innerText = data;
+            document.getElementById("reportForm").reset(); // Clear form after successful submission
+        })
+        .catch(error => console.error("Error:", error));
+    });
+</script>
+
+</body>
+</html>
